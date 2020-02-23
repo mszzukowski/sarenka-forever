@@ -3,6 +3,13 @@
 # Background image: https://pl.freepik.com/darmowe-zdjecie-wektory/kochanie > Kochanie plik wektorowy utworzone przez starline - pl.freepik.com
 # Background music from Free Music Archive https://freemusicarchive.org/
 
+# TODO: (1) restart game
+# TODO: (2) new sounds
+# TODO: (3) save higscore and show list of it after game over
+# TODO: (4) refactor code
+# TODO: (5) not only endless mode?
+
+
 import pygame
 import random
 import math
@@ -164,6 +171,12 @@ while running:
                 score_val += 1
                 enemyX[i] = random.randint(0, screenX - 66)
             enemy(enemyX[i], enemyY[i], i)
+
+            for j in range(num_of_enemies):
+                if j != i:
+                    if isCollision(enemyX[i], enemyY[i], enemyX[j], enemyY[j]):
+                        enemyX[i] = random.randint(0, screenX - 66)
+                        enemy(enemyX[i], enemyY[i], i)
 
     # bullet movement
     if bulletY <= 0:
