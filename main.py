@@ -3,11 +3,12 @@
 # Background image: https://pl.freepik.com/darmowe-zdjecie-wektory/kochanie > Kochanie plik wektorowy utworzone przez starline - pl.freepik.com
 # Background music from Free Music Archive https://freemusicarchive.org/
 
+# TODO: (0) put doc comments
 # TODO: (1) restart game
-# TODO: (2) new sounds
-# TODO: (3) save higscore and show list of it after game over
-# TODO: (4) refactor code
-# TODO: (5) not only endless mode?
+# TODO: (2) new sounds and images
+# TODO: (3) save high score and show list of it after game over
+# TODO: (4) refactor code (new file, OOP maybe?)
+# TODO: (5) move speed from timer not only loop
 
 
 import pygame
@@ -33,12 +34,18 @@ pygame.display.set_caption('Sarenka Forever')
 icon = pygame.image.load('./include/graphics/roe-ico.png')
 pygame.display.set_icon(icon)
 
+# lvl
+lvl = 1
+lvl_txtX = screenX - 100
+lvl_txtY = 10
+mov_speed = 5 * lvl
+
 # Player initialization
 playerImg = pygame.image.load('./include/graphics/roe.png')
 playerX = 370
 playerY = 480
-mov_speed = 5
-player_change = 0
+playerX_change = 0
+playerY_change = 0
 
 # Enemy
 enemyImg = []
@@ -66,7 +73,7 @@ bullet_vis = False
 score_val = 0
 font = pygame.font.Font('./include/fonts/LittleDaisy.ttf', 32)
 textX = 10
-testY = 10
+textY = 10
 
 # Game Over
 font_over = pygame.font.Font('./include/fonts/LittleDaisy.ttf', 64)
@@ -81,6 +88,11 @@ def game_over_text():
 def show_score(x, y):
     score = font.render('Score: ' + str(score_val), True, (0, 0, 0))
     screen.blit(score, (x, y))
+
+
+def show_lvl(x, y, lvl):
+    lvl_txt = font.render('lvl: ' + str(lvl), True, (0, 0, 0))
+    screen.blit(lvl_txt, (x, y))
 
 
 def player(x, y):
@@ -105,6 +117,14 @@ def isCollision(x1, y1, x2, y2):
     return False
 
 
+def levelization(score_val, step):
+    global lvl
+    if score_val % step == 0:
+        return int((score_val / step) + 1)
+    else:
+        return lvl
+
+
 # game loop
 running = True
 while running:
@@ -120,9 +140,13 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
             if event.key == pygame.K_LEFT:
-                player_change = -mov_speed * 2
+                playerX_change = -mov_speed * 2
             if event.key == pygame.K_RIGHT:
-                player_change = mov_speed * 2
+                playerX_change = mov_speed * 2
+            if event.key == pygame.K_UP:
+                playerY_change = -mov_speed * 2
+            if event.key == pygame.K_DOWN:
+                playerY_change = mov_speed * 2
             if event.key == pygame.K_SPACE:
                 if not bullet_vis:
                     bullet_sound = mixer.Sound('./include/sounds/laser.wav')
@@ -133,14 +157,21 @@ while running:
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                player_change = 0
+                playerX_change = 0
+            if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
+                playerY_change = 0
 
-    playerX += player_change
+    playerX += playerX_change
+    playerY += playerY_change
 
     if playerX <= 0:
         playerX = 0
     elif playerX >= (screenX - 64):
         playerX = screenX - 64
+    if playerY <= 0:
+        playerY = 0
+    elif playerY >= (screenY - 64):
+        playerY = screenY - 64
 
     # enemy movement
     for i in range(num_of_enemies):
@@ -169,6 +200,7 @@ while running:
                 bulletY = playerY
                 bullet_vis = False
                 score_val += 1
+                lvl = levelization(score_val, 12)
                 enemyX[i] = random.randint(0, screenX - 66)
             enemy(enemyX[i], enemyY[i], i)
 
@@ -187,5 +219,6 @@ while running:
         bulletY -= mov_speed * 7.5
 
     player(playerX, playerY)
-    show_score(textX, testY)
+    show_score(textX, textY)
+    show_lvl(lvl_txtX, lvl_txtY, lvl)
     pygame.display.update()
