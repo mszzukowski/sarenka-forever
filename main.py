@@ -1,6 +1,6 @@
 # this game was inspired by https://www.youtube.com/watch?v=FfWpgLFMI7w
 # Icons made by https://www.flaticon.com/authors/photo3idea-studio - > photo3idea_studio at > www.flaticon.com
-# Background image: https://pl.freepik.com/darmowe-zdjecie-wektory/kochanie > Kochanie plik wektorowy utworzone przez starline - pl.freepik.com
+# Background image: https://pl.freepik.com/darmowe-zdjecie-wektory/kochanie > pl.freepik.com
 # Background music from Free Music Archive https://freemusicarchive.org/
 
 # TODO: (0) put doc comments
@@ -91,9 +91,9 @@ def show_score(x, y):
     screen.blit(score, (x, y))
 
 
-def show_lvl(x, y, lvl):
+def show_lvl(x, y, level):
     # shows player lvl
-    lvl_txt = font.render('lvl: ' + str(lvl), True, (0, 0, 0))
+    lvl_txt = font.render('lvl: ' + str(level), True, (0, 0, 0))
     screen.blit(lvl_txt, (x, y))
 
 
@@ -102,9 +102,9 @@ def player(x, y):
     screen.blit(playerImg, (x, y))
 
 
-def enemy(x, y, i):
+def enemy(x, y, num):
     # shows enemies
-    screen.blit(enemyImg[i], (x, y))
+    screen.blit(enemyImg[num], (x, y))
 
 
 def bullet(x):
@@ -115,7 +115,7 @@ def bullet(x):
     screen.blit(bulletImg, (x + 16, bulletY + 10))
 
 
-def isCollision(x1, y1, x2, y2):
+def is_collision(x1, y1, x2, y2):
     # collision detection
     distance = math.sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2))
     if distance < 35:
@@ -123,11 +123,11 @@ def isCollision(x1, y1, x2, y2):
     return False
 
 
-def levelization(score_val, step):
+def levelization(score_value, step):
     # added to change lvl number
     global lvl
-    if score_val % step == 0:
-        return int((score_val / step) + 1)
+    if score_value % step == 0:
+        return int((score_value / step) + 1)
     else:
         return lvl
 
@@ -144,11 +144,10 @@ def restart_game():
     show_score(textX, textY)
     show_lvl(lvl_txtX, lvl_txtY, lvl)
     is_game_over = False
-    for i in range(num_of_enemies):
-        print(i)
-        print(enemyY[i])
-        enemyY[i] = 0
-        print(enemyY[i])
+    for num in range(num_of_enemies):
+        print(enemyY[num])
+        enemyY[num] = 0
+        print(enemyY[num])
 
 
 # game loop
@@ -206,7 +205,7 @@ while running:
     # enemy movement
     for i in range(num_of_enemies):
         # Game Over
-        if isCollision(enemyX[i], enemyY[i], playerX, playerY):
+        if is_collision(enemyX[i], enemyY[i], playerX, playerY):
             is_game_over = True
 
         if is_game_over:
@@ -223,7 +222,7 @@ while running:
             elif enemyX[i] >= (screenX - 64):
                 enemyX_change[i] = -mov_speed
                 enemyY[i] += mov_speed * 5
-            if isCollision(enemyX[i], enemyY[i], bulletX, bulletY) and bullet_vis:
+            if is_collision(enemyX[i], enemyY[i], bulletX, bulletY) and bullet_vis:
                 collision_sound = mixer.Sound('./include/sounds/explosion.wav')
                 collision_sound.play()
                 enemyY[i] = -1
@@ -236,7 +235,7 @@ while running:
 
             for j in range(num_of_enemies):
                 if j != i:
-                    if isCollision(enemyX[i], enemyY[i], enemyX[j], enemyY[j]):
+                    if is_collision(enemyX[i], enemyY[i], enemyX[j], enemyY[j]):
                         enemyX[i] = random.randint(0, screenX - 66)
                         enemy(enemyX[i], enemyY[i], i)
 
