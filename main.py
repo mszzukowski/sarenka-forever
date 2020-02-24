@@ -13,6 +13,7 @@
 import pygame
 import random
 import math
+import json
 from pygame import mixer
 
 # initialize the pygame
@@ -145,10 +146,34 @@ def restart_game():
     show_lvl(lvl_txtX, lvl_txtY, lvl)
     is_game_over = False
     for num in range(num_of_enemies):
-        print(enemyY[num])
         enemyY[num] = 0
-        print(enemyY[num])
 
+def high_score(score, name='Mistrz'):
+    # getting hs table from file and save to it
+    # todo: showing hs table - return I think
+    print('hs')
+    hs = {}
+    champion = False
+    with open('hs.json') as hs_file:
+        hs = json.load(hs_file)
+        # print(hs)
+        for l in hs['high_scores']:
+            if score_val > int(l['score']):
+                champion = True
+
+        print(champion)
+        if champion:
+            adder = {'name': name, 'score': score}
+            hs['high_scores'].append(adder)
+            hs['high_scores'] = sorted(hs['high_scores'], key=lambda k: int(k['score']), reverse=True)
+
+        for bests in hs['high_scores']:
+            print('Name:' + bests['name'])
+            print('Score:' + str(bests['score']))
+
+    if champion:
+        with open('hs.json', 'w') as saver:
+            json.dump(hs, saver)
 
 # game loop
 running = True
@@ -207,6 +232,7 @@ while running:
         # Game Over
         if is_collision(enemyX[i], enemyY[i], playerX, playerY):
             is_game_over = True
+            high_score(score_val, 'Mistrz')
 
         if is_game_over:
             for j in range(num_of_enemies):
