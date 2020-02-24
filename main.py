@@ -5,7 +5,6 @@
 
 # TODO: (0) put doc comments
 # TODO: (2) new sounds and images
-# TODO: (3) save high score and show list of it after game over
 # TODO: (4) refactor code (new file, OOP maybe?)
 # TODO: (5) move speed from timer not only loop
 
@@ -55,6 +54,9 @@ enemyX_change = []
 enemyY_change = []
 num_of_enemies = 7
 
+# High score list
+high_score_list = []
+
 for i in range(num_of_enemies):
     enemyImg.append(pygame.image.load('./include/graphics/enemy.png'))
     enemyX.append(random.randint(0, screenX))
@@ -76,14 +78,21 @@ textX = 10
 textY = 10
 
 # Game Over
-font_over = pygame.font.Font('./include/fonts/LittleDaisy.ttf', 64)
+font_over = pygame.font.Font('./include/fonts/Canterbury.ttf', 32)
 is_game_over = False
 
 
-def game_over_text():
+def game_over_text(hs_list):
     # what to say after game is over
-    over_text = font_over.render('GAME OVER ', True, (0, 0, 0))
-    screen.blit(over_text, (200, 250))
+    to_show = ['GAME OVER', 'High scores:']
+    for players in hs_list:
+        element = str(players['name']) + ": " + str(players['score'])
+        to_show.append(element)
+
+    to_show.append('Press [R] to restart game or [Q] to quit')
+    for e in range(len(to_show)):
+        over_text = font_over.render(to_show[e], True, (0, 0, 0))
+        screen.blit(over_text, (10, 50 + 50 * e))
 
 
 def show_score(x, y):
@@ -148,11 +157,9 @@ def restart_game():
     for num in range(num_of_enemies):
         enemyY[num] = 0
 
-def high_score(score, name='Mistrz'):
+
+def high_score(score, name='Player'):
     # getting hs table from file and save to it
-    # todo: showing hs table - return I think
-    print('hs')
-    hs = {}
     champion = False
     with open('hs.json') as hs_file:
         hs = json.load(hs_file)
@@ -167,13 +174,13 @@ def high_score(score, name='Mistrz'):
             hs['high_scores'].append(adder)
             hs['high_scores'] = sorted(hs['high_scores'], key=lambda k: int(k['score']), reverse=True)
 
-        for bests in hs['high_scores']:
-            print('Name:' + bests['name'])
-            print('Score:' + str(bests['score']))
-
+    if len(hs['high_scores']) > 7:
+        hs['high_scores'] = hs['high_scores'][:6]
     if champion:
         with open('hs.json', 'w') as saver:
             json.dump(hs, saver)
+    return hs['high_scores']
+
 
 # game loop
 running = True
@@ -232,12 +239,12 @@ while running:
         # Game Over
         if is_collision(enemyX[i], enemyY[i], playerX, playerY):
             is_game_over = True
-            high_score(score_val, 'Mistrz')
+            high_score_list = high_score(score_val, 'Player')
 
         if is_game_over:
             for j in range(num_of_enemies):
                 enemyY[j] = screenY * 10
-            game_over_text()
+            game_over_text(high_score_list)
             break
 
         else:
