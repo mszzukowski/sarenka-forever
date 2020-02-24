@@ -4,7 +4,6 @@
 # Background music from Free Music Archive https://freemusicarchive.org/
 
 # TODO: (0) put doc comments
-# TODO: (1) restart game
 # TODO: (2) new sounds and images
 # TODO: (3) save high score and show list of it after game over
 # TODO: (4) refactor code (new file, OOP maybe?)
@@ -81,36 +80,43 @@ is_game_over = False
 
 
 def game_over_text():
+    # what to say after game is over
     over_text = font_over.render('GAME OVER ', True, (0, 0, 0))
     screen.blit(over_text, (200, 250))
 
 
 def show_score(x, y):
+    # shows player score
     score = font.render('Score: ' + str(score_val), True, (0, 0, 0))
     screen.blit(score, (x, y))
 
 
 def show_lvl(x, y, lvl):
+    # shows player lvl
     lvl_txt = font.render('lvl: ' + str(lvl), True, (0, 0, 0))
     screen.blit(lvl_txt, (x, y))
 
 
 def player(x, y):
+    # shows player
     screen.blit(playerImg, (x, y))
 
 
 def enemy(x, y, i):
+    # shows enemies
     screen.blit(enemyImg[i], (x, y))
 
 
 def bullet(x):
+    # function to define player ammunition
+    # todo: don't use global variables!
     global bullet_vis
     bullet_vis = True
     screen.blit(bulletImg, (x + 16, bulletY + 10))
 
 
-# collision
 def isCollision(x1, y1, x2, y2):
+    # collision detection
     distance = math.sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2))
     if distance < 35:
         return True
@@ -118,11 +124,31 @@ def isCollision(x1, y1, x2, y2):
 
 
 def levelization(score_val, step):
+    # added to change lvl number
     global lvl
     if score_val % step == 0:
         return int((score_val / step) + 1)
     else:
         return lvl
+
+
+def restart_game():
+    # function to restart the game. Works pretty well.
+    # TODO: don't use global variables!
+    global score_val, lvl, playerX, playerY, num_of_enemies, is_game_over, screenY, enemyY
+    score_val = 0
+    lvl = 1
+    playerX = 370
+    playerY = 480
+    player(playerX, playerY)
+    show_score(textX, textY)
+    show_lvl(lvl_txtX, lvl_txtY, lvl)
+    is_game_over = False
+    for i in range(num_of_enemies):
+        print(i)
+        print(enemyY[i])
+        enemyY[i] = 0
+        print(enemyY[i])
 
 
 # game loop
@@ -137,7 +163,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
                 running = False
             if event.key == pygame.K_LEFT:
                 playerX_change = -mov_speed * 2
@@ -154,6 +180,8 @@ while running:
                     # get current x coordinate if bullet is visible
                     bulletX = playerX
                     bullet(bulletX)
+            if event.key == pygame.K_r:
+                restart_game()
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -164,6 +192,8 @@ while running:
     playerX += playerX_change
     playerY += playerY_change
 
+    # Player can't go out of screen
+    # todo: enemy shouldn't neither
     if playerX <= 0:
         playerX = 0
     elif playerX >= (screenX - 64):
@@ -218,6 +248,7 @@ while running:
         bullet(bulletX)
         bulletY -= mov_speed * 7.5
 
+    # show everything
     player(playerX, playerY)
     show_score(textX, textY)
     show_lvl(lvl_txtX, lvl_txtY, lvl)
