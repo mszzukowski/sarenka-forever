@@ -5,7 +5,6 @@
 
 # TODO: (2) new sounds and images
 # TODO: (4) refactor code (new file, OOP maybe?)
-# TODO: (5) move speed from timer not only loop
 
 
 import pygame
@@ -105,7 +104,7 @@ def show_score(x, y):
 
 def show_fps(x, y, num_fps):
     # shows fps number
-    fps = font.render('FPS: ' + str(num_fps), True, (0,0,0))
+    fps = font.render('FPS: ' + str(num_fps), True, (0, 0, 0))
     screen.blit(fps, (x, y))
 
 
@@ -171,8 +170,8 @@ def high_score(score, name='Player'):
     champion = False
     with open('configs/hs.json') as hs_file:
         hs = json.load(hs_file)
-        for l in hs['high_scores']:
-            if score_val > int(l['score']):
+        for numb in hs['high_scores']:
+            if score_val > int(numb['score']):
                 champion = True
         if champion:
             adder = {'name': name, 'score': score}
@@ -191,6 +190,7 @@ def high_score(score, name='Player'):
 running = True
 while running:
     clock.tick(60)
+    # screen.fill((255,255,255))
     screen.blit(background, (0, 0))
 
     # events handler - keyboard inputs
@@ -296,6 +296,9 @@ while running:
     if bullet_vis:
         bullet(bulletX)
         bulletY -= mov_speed * 7.5
+
+    # changing move speed
+    mov_speed = 5 * lvl
 
     # show everything
     player(playerX, playerY)
