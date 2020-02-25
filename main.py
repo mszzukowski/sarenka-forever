@@ -17,6 +17,9 @@ from pygame import mixer
 # initialize the pygame
 pygame.init()
 
+# timer
+clock = pygame.time.Clock()
+
 # create the screen
 screenX = 800
 screenY = 600
@@ -100,6 +103,12 @@ def show_score(x, y):
     screen.blit(score, (x, y))
 
 
+def show_fps(x, y, num_fps):
+    # shows fps number
+    fps = font.render('FPS: ' + str(num_fps), True, (0,0,0))
+    screen.blit(fps, (x, y))
+
+
 def show_lvl(x, y, level):
     # shows player lvl
     lvl_txt = font.render('lvl: ' + str(level), True, (0, 0, 0))
@@ -181,6 +190,7 @@ def high_score(score, name='Player'):
 # game loop
 running = True
 while running:
+    clock.tick(60)
     screen.blit(background, (0, 0))
 
     # events handler - keyboard inputs
@@ -291,4 +301,5 @@ while running:
     player(playerX, playerY)
     show_score(textX, textY)
     show_lvl(lvl_txtX, lvl_txtY, lvl)
+    show_fps(screenX - 175, screenY - 50, round(clock.get_fps(), 2))
     pygame.display.update()
