@@ -3,7 +3,6 @@
 # Background image: https://pl.freepik.com/darmowe-zdjecie-wektory/kochanie > pl.freepik.com
 # Background music from Free Music Archive https://freemusicarchive.org/
 
-# TODO: (0) put doc comments
 # TODO: (2) new sounds and images
 # TODO: (4) refactor code (new file, OOP maybe?)
 # TODO: (5) move speed from timer not only loop
@@ -46,7 +45,7 @@ playerY = 480
 playerX_change = 0
 playerY_change = 0
 
-# Enemy
+# Enemy initialization
 enemyImg = []
 enemyX = []
 enemyY = []
@@ -54,15 +53,15 @@ enemyX_change = []
 enemyY_change = []
 num_of_enemies = 7
 
-# High score list
-high_score_list = []
-
 for i in range(num_of_enemies):
     enemyImg.append(pygame.image.load('./include/graphics/enemy.png'))
     enemyX.append(random.randint(0, screenX))
     enemyY.append(0)
     enemyX_change.append(mov_speed)
     enemyY_change.append(0)
+
+# High score list
+high_score_list = []
 
 # Bullet
 bulletImg = pygame.image.load('./include/graphics/ball.png')
@@ -161,23 +160,20 @@ def restart_game():
 def high_score(score, name='Player'):
     # getting hs table from file and save to it
     champion = False
-    with open('hs.json') as hs_file:
+    with open('configs/hs.json') as hs_file:
         hs = json.load(hs_file)
-        # print(hs)
         for l in hs['high_scores']:
             if score_val > int(l['score']):
                 champion = True
-
-        print(champion)
         if champion:
             adder = {'name': name, 'score': score}
             hs['high_scores'].append(adder)
             hs['high_scores'] = sorted(hs['high_scores'], key=lambda k: int(k['score']), reverse=True)
 
     if len(hs['high_scores']) > 7:
-        hs['high_scores'] = hs['high_scores'][:6]
+        hs['high_scores'] = hs['high_scores'][:7]
     if champion:
-        with open('hs.json', 'w') as saver:
+        with open('configs/hs.json', 'w') as saver:
             json.dump(hs, saver)
     return hs['high_scores']
 
@@ -185,11 +181,9 @@ def high_score(score, name='Player'):
 # game loop
 running = True
 while running:
-    # background - white RGB
-    # screen.fill((255, 255, 255))
-
     screen.blit(background, (0, 0))
 
+    # events handler - keyboard inputs
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -220,11 +214,11 @@ while running:
             if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
                 playerY_change = 0
 
+    # player move
     playerX += playerX_change
     playerY += playerY_change
 
     # Player can't go out of screen
-    # todo: enemy shouldn't neither
     if playerX <= 0:
         playerX = 0
     elif playerX >= (screenX - 64):
@@ -236,11 +230,12 @@ while running:
 
     # enemy movement
     for i in range(num_of_enemies):
-        # Game Over
+        # Game Over checker
         if is_collision(enemyX[i], enemyY[i], playerX, playerY):
             is_game_over = True
             high_score_list = high_score(score_val, 'Player')
 
+        # enemies out of screen
         if is_game_over:
             for j in range(num_of_enemies):
                 enemyY[j] = screenY * 10
@@ -249,12 +244,16 @@ while running:
 
         else:
             enemyX[i] += enemyX_change[i]
+
+            # enemies turn move if their touch wall
             if enemyX[i] <= 0:
                 enemyX_change[i] = mov_speed
                 enemyY[i] += mov_speed * 5
             elif enemyX[i] >= (screenX - 64):
                 enemyX_change[i] = -mov_speed
                 enemyY[i] += mov_speed * 5
+
+            # when enemy was shot
             if is_collision(enemyX[i], enemyY[i], bulletX, bulletY) and bullet_vis:
                 collision_sound = mixer.Sound('./include/sounds/explosion.wav')
                 collision_sound.play()
@@ -264,8 +263,16 @@ while running:
                 score_val += 1
                 lvl = levelization(score_val, 12)
                 enemyX[i] = random.randint(0, screenX - 66)
+
+            # enemies can't go out of screen
+            if enemyY[i] < 0:
+                enemyY[i] = 0
+            elif screenY * 5 > enemyY[i] > screenY + 64:
+                enemyY[i] = 0
+
             enemy(enemyX[i], enemyY[i], i)
 
+            # enemies can't be in the same place
             for j in range(num_of_enemies):
                 if j != i:
                     if is_collision(enemyX[i], enemyY[i], enemyX[j], enemyY[j]):
